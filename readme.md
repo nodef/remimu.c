@@ -1,8 +1,20 @@
 # Remimu: Single-Header C/C++ Regex Library
 
-Compatible with C99 and C++11 and later standards. Uses backtracking and relatively standard regex syntax.
+Compatible with C99 and C++11 and later standards. Uses backtracking and relatively standard regex syntax, by [Alexander Nadeau](https://github.com/wareya).
 
     #include "remimu.h"
+
+## Installation
+
+Run:
+```bash
+$ npm i remimu.c
+```
+
+And then include `remimu.h` as follows:
+```c
+#include "node_modules/remimu.c/remimu.h"
+```
 
 ## Functions
 ```c
@@ -13,7 +25,7 @@ Compatible with C99 and C++11 and later standards. Uses backtracking and relativ
         int16_t * token_count,      // Maximum allowed number of tokens to write
         int32_t flags               // Optional bitflags.
     )
-    
+
     // Returns match length, or -1 on no match, or -2 on out of memory, or -3 if the regex is invalid.
     static inline int64_t regex_match(
         const RegexToken * tokens,  // Parsed regex to match against text.
@@ -22,8 +34,8 @@ Compatible with C99 and C++11 and later standards. Uses backtracking and relativ
         uint16_t cap_slots,         // Number of allowed capture info output slots.
         int64_t * cap_pos,          // Capture position info output buffer.
         int64_t * cap_span          // Capture length info output buffer.
-    ) 
-    
+    )
+
     static inline void print_regex_tokens(
         RegexToken * tokens     // Regex tokens to spew to stdout, for debugging.
     )
@@ -84,32 +96,32 @@ Remimu uses length-checked fixed memory buffers with no recursion, so memory usa
 ## Usage
 ```c
     // minimal:
-    
+
     RegexToken tokens[1024];
     int16_t token_count = 1024;
     int e = regex_parse("[0-9]+\\.[0-9]+", tokens, &token_count, 0);
     assert(!e);
-    
+
     int64_t match_len = regex_match(tokens, "23.53) ", 0, 0, 0, 0);
     printf("########### return: %zd\n", match_len);
-    
+
     // with captures:
-    
+
     RegexToken tokens[256];
     int16_t token_count = sizeof(tokens)/sizeof(tokens[0]);
     int e = regex_parse("((a)|(b))++", tokens, &token_count, 0);
     assert(!e);
-    
+
     int64_t cap_pos[5];
     int64_t cap_span[5];
     memset(cap_pos, 0xFF, sizeof(cap_pos));
     memset(cap_span, 0xFF, sizeof(cap_span));
-    
+
     int64_t matchlen = regex_match(tokens, "aaaaaabbbabaqa", 0, 5, cap_pos, cap_span);
     printf("Match length: %zd\n", matchlen);
     for (int i = 0; i < 5; i++)
         printf("Capture %d: %zd plus %zd\n", i, cap_pos[i], cap_span[i]);
-        
+
     // for debugging
     print_regex_tokens(tokens);
 ```
@@ -120,3 +132,10 @@ Remimu uses length-checked fixed memory buffers with no recursion, so memory usa
 ## License
 
 Creative Commons Zero, public domain.
+
+<br>
+<br>
+
+
+[![ORG](https://img.shields.io/badge/org-nodef-green?logo=Org)](https://nodef.github.io)
+![](https://ga-beacon.deno.dev/G-RC63DPBH3P:SH3Eq-NoQ9mwgYeHWxu7cw/github.com/nodef/remimu.c)
