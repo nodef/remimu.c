@@ -1,0 +1,23 @@
+{
+  "name": "remimu.c",
+  "version": "1.2025.8",
+  "description": "Single-file header-only regex engine, C99/C++11; Alexander Nadeau (2024).",
+  "keywords": [
+    "c",
+    "library",
+    "regex",
+    "engine",
+    "c99",
+    "c++11"
+  ],
+  "homepage": "https://github.com/nodef/remimu.c#readme",
+  "bugs": {
+    "url": "https://github.com/nodef/remimu.c/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nodef/remimu.c.git"
+  },
+  "license": "CC0-1.0",
+  "main": "remimu.h"
+}
