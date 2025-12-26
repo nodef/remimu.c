@@ -2,47 +2,81 @@
 
 Compatible with C99 and C++11 and later standards. Uses backtracking and relatively standard regex syntax, by [Alexander Nadeau](https://github.com/wareya).
 
-    #include "remimu.h"
+<br>
 
 ## Installation
 
 Run:
-```bash
+
+```sh
 $ npm i remimu.c
 ```
 
 And then include `remimu.h` as follows:
+
 ```c
+// main.c
 #include "node_modules/remimu.c/remimu.h"
+
+int main() { /* ... */ }
 ```
+
+And then compile with `clang` or `gcc` as usual.
+
+```bash
+$ clang main.c  # or, use gcc
+$ gcc   main.c
+```
+
+You may also use a simpler approach:
+
+```c
+// main.c
+#include <remimu.h>
+
+int main() { /* ... */ }
+```
+
+If you add the path `node_modules/remimu.c` to your compiler's include paths.
+
+```bash
+$ clang -I./node_modules/remimu.c main.c  # or, use gcc
+$ gcc   -I./node_modules/remimu.c main.c
+```
+
+<br>
 
 ## Functions
+
 ```c
-    // Returns 0 on success, or -1 on invalid or unsupported regex, or -2 on not enough tokens given to parse regex.
-    static inline int regex_parse(
-        const char * pattern,       // Regex pattern to parse.
-        RegexToken * tokens,        // Output buffer of token_count regex tokens.
-        int16_t * token_count,      // Maximum allowed number of tokens to write
-        int32_t flags               // Optional bitflags.
-    )
+// Returns 0 on success, or -1 on invalid or unsupported regex, or -2 on not enough tokens given to parse regex.
+static inline int regex_parse(
+    const char * pattern,       // Regex pattern to parse.
+    RegexToken * tokens,        // Output buffer of token_count regex tokens.
+    int16_t * token_count,      // Maximum allowed number of tokens to write
+    int32_t flags               // Optional bitflags.
+)
 
-    // Returns match length, or -1 on no match, or -2 on out of memory, or -3 if the regex is invalid.
-    static inline int64_t regex_match(
-        const RegexToken * tokens,  // Parsed regex to match against text.
-        const char * text,          // Text to match against tokens.
-        size_t start_i,             // index value to match at.
-        uint16_t cap_slots,         // Number of allowed capture info output slots.
-        int64_t * cap_pos,          // Capture position info output buffer.
-        int64_t * cap_span          // Capture length info output buffer.
-    )
+// Returns match length, or -1 on no match, or -2 on out of memory, or -3 if the regex is invalid.
+static inline int64_t regex_match(
+    const RegexToken * tokens,  // Parsed regex to match against text.
+    const char * text,          // Text to match against tokens.
+    size_t start_i,             // index value to match at.
+    uint16_t cap_slots,         // Number of allowed capture info output slots.
+    int64_t * cap_pos,          // Capture position info output buffer.
+    int64_t * cap_span          // Capture length info output buffer.
+)
 
-    static inline void print_regex_tokens(
-        RegexToken * tokens     // Regex tokens to spew to stdout, for debugging.
-    )
+static inline void print_regex_tokens(
+    RegexToken * tokens     // Regex tokens to spew to stdout, for debugging.
+)
 ```
+
 Remimu doesn't have a searching API.
 
 If `static inline` doesn't work for your project, define the `REMIMU_FUNC_VISIBILITY` (default `static inline`) and `REMIMU_CONST_VISIBILITY` (default `static const`) visibility prefix macros before including the header. Remimu doesn't use mutable global or mutable static variables, so no prefix macro is needed for them.
+
+<br>
 
 ## Performance
 
@@ -51,6 +85,8 @@ On simple cases, Remimu's match speed is similar to PCRE2. Regex parsing/compila
 HOWEVER: Remimu is a pure backtracking engine, and has `O(2^x)` complexity on regexes with catastrophic backtracking. It can be much, much, MUCH slower than PCRE2. Beware!
 
 Remimu uses length-checked fixed memory buffers with no recursion, so memory usage is statically known.
+
+<br>
 
 ## Features
 
@@ -81,6 +117,8 @@ Remimu uses length-checked fixed memory buffers with no recursion, so memory usa
 - Atomic groups e.g. `(?>(asdf))`
 - - NOTE: Capture groups inside of atomic groups return no capture information.
 
+<br>
+
 ## Not Supported
 
 - Strings with non-terminal null characters
@@ -93,41 +131,48 @@ Remimu uses length-checked fixed memory buffers with no recursion, so memory usa
 - Most other weird flavor-specific regex stuff
 - Capture of or inside of possessive-quantified groups (still take up a capture slot, but no data is returned)
 
+<br>
+
 ## Usage
 ```c
-    // minimal:
+// minimal:
 
-    RegexToken tokens[1024];
-    int16_t token_count = 1024;
-    int e = regex_parse("[0-9]+\\.[0-9]+", tokens, &token_count, 0);
-    assert(!e);
+RegexToken tokens[1024];
+int16_t token_count = 1024;
+int e = regex_parse("[0-9]+\\.[0-9]+", tokens, &token_count, 0);
+assert(!e);
 
-    int64_t match_len = regex_match(tokens, "23.53) ", 0, 0, 0, 0);
-    printf("########### return: %zd\n", match_len);
+int64_t match_len = regex_match(tokens, "23.53) ", 0, 0, 0, 0);
+printf("########### return: %zd\n", match_len);
 
-    // with captures:
+// with captures:
 
-    RegexToken tokens[256];
-    int16_t token_count = sizeof(tokens)/sizeof(tokens[0]);
-    int e = regex_parse("((a)|(b))++", tokens, &token_count, 0);
-    assert(!e);
+RegexToken tokens[256];
+int16_t token_count = sizeof(tokens)/sizeof(tokens[0]);
+int e = regex_parse("((a)|(b))++", tokens, &token_count, 0);
+assert(!e);
 
-    int64_t cap_pos[5];
-    int64_t cap_span[5];
-    memset(cap_pos, 0xFF, sizeof(cap_pos));
-    memset(cap_span, 0xFF, sizeof(cap_span));
+int64_t cap_pos[5];
+int64_t cap_span[5];
+memset(cap_pos, 0xFF, sizeof(cap_pos));
+memset(cap_span, 0xFF, sizeof(cap_span));
 
-    int64_t matchlen = regex_match(tokens, "aaaaaabbbabaqa", 0, 5, cap_pos, cap_span);
-    printf("Match length: %zd\n", matchlen);
-    for (int i = 0; i < 5; i++)
-        printf("Capture %d: %zd plus %zd\n", i, cap_pos[i], cap_span[i]);
+int64_t matchlen = regex_match(tokens, "aaaaaabbbabaqa", 0, 5, cap_pos, cap_span);
+printf("Match length: %zd\n", matchlen);
+for (int i = 0; i < 5; i++)
+    printf("Capture %d: %zd plus %zd\n", i, cap_pos[i], cap_span[i]);
 
-    // for debugging
-    print_regex_tokens(tokens);
+// for debugging
+print_regex_tokens(tokens);
 ```
+
+<br>
+
 ## Testing
 
 `my_regex_tests.cpp` is a C++11 program that throws a matrix of regexes and test strings into PCRE2 and validates that they're matched the same way in Remimu (for supported features). It contains a good number of gotcha regexes.
+
+<br>
 
 ## License
 
@@ -137,6 +182,6 @@ Creative Commons Zero, public domain.
 <br>
 
 
+[![SRC](https://img.shields.io/badge/src-repo-green?logo=Org)](https://github.com/wareya/Remimu)
 [![ORG](https://img.shields.io/badge/org-nodef-green?logo=Org)](https://nodef.github.io)
 ![](https://ga-beacon.deno.dev/G-RC63DPBH3P:SH3Eq-NoQ9mwgYeHWxu7cw/github.com/nodef/remimu.c)
-[![SRC](https://img.shields.io/badge/src-repo-green?logo=Org)](https://github.com/wareya/Remimu)
