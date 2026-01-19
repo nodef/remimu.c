@@ -1,6 +1,6 @@
 {
   "name": "remimu.c",
-  "version": "1.2025.9",
+  "version": "1.2025.10",
   "description": "Single-file header-only regex engine, C99/C++11; Alexander Nadeau (2024).",
   "keywords": [
     "c",
